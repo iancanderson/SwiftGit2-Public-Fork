@@ -457,13 +457,18 @@ final public class Repository {
 					git_push_init_options(&options, UInt32(GIT_PUSH_OPTIONS_VERSION))
 				}
 				// lookup refspec
+				let refspecString = "\(branch.longName):\(branch.longName)"
+				git_remote_add_push(pointer, remoteSwift.name, refspecString)
+				
 				var refspecArray = git_strarray()
 				let getRefspecsResult = git_remote_get_push_refspecs(&refspecArray, remote)
 				guard getRefspecsResult == GIT_OK.rawValue else {
 					return Result.failure(NSError(gitError: getRefspecsResult, pointOfFailure: "git_remote_get_push_refspecs"))
 				}
+				
 				defer { git_strarray_free(&refspecArray) }
-				guard let refspec = (refspecArray.filter { $0 == "\(branch.longName):\(branch.longName)" }).first else {
+				
+				guard let refspec = (refspecArray.filter { $0 == refspecString }).first else {
 					return Result.failure(NSError(domain: "SwiftGit2", code: -1, userInfo: nil))
 				}
 				let ptrRefspec = UnsafeMutablePointer<Int8>(mutating: (refspec as NSString).utf8String)
