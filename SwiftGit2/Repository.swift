@@ -181,6 +181,10 @@ final public class Repository {
 			}
 
 			let repository = Repository(pointer!)
+		
+			let refspecString = "refs/heads/master:refs/heads/master"
+			git_remote_add_push(pointer, "origin", refspecString)
+		
 			return Result.success(repository)
 	}
 
@@ -458,7 +462,6 @@ final public class Repository {
 				}
 				// lookup refspec
 				let refspecString = "\(branch.longName):\(branch.longName)"
-				git_remote_add_push(pointer, remoteSwift.name, refspecString)
 				
 				var refspecArray = git_strarray()
 				let getRefspecsResult = git_remote_get_push_refspecs(&refspecArray, remote)
