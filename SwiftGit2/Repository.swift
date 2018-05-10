@@ -456,23 +456,11 @@ final public class Repository {
 					options = git_push_options()
 					git_push_init_options(&options, UInt32(GIT_PUSH_OPTIONS_VERSION))
 				}
-				// lookup refspec
-				var refspecArray = git_strarray()
-				let getRefspecsResult = git_remote_get_push_refspecs(&refspecArray, remote)
-				guard getRefspecsResult == GIT_OK.rawValue else {
-					return Result.failure(NSError(gitError: getRefspecsResult, pointOfFailure: "git_remote_get_push_refspecs"))
-				}
-				defer { git_strarray_free(&refspecArray) }
-				guard let refspec = (refspecArray.filter { $0 == "\(branch.longName):\(branch.longName)" }).first else {
-					return Result.failure(NSError(domain: "SwiftGit2", code: -1, userInfo: nil))
-				}
-				let ptrRefspec = UnsafeMutablePointer<Int8>(mutating: (refspec as NSString).utf8String)
-				var selectedRefspecs = [ptrRefspec]
-				var selectedRefspecArray = git_strarray(strings: &selectedRefspecs, count: 1)
+
 				// do the push
-				let uploadResult = git_remote_upload(remote, &selectedRefspecArray, &options)
-				guard uploadResult == GIT_OK.rawValue else {
-					return Result.failure(NSError(gitError: uploadResult, pointOfFailure: "git_remote_upload"))
+				let pushResult = git_remote_push(remote, nil, &options)
+				guard pushResult == GIT_OK.rawValue else {
+					return Result.failure(NSError(gitError: pushResult, pointOfFailure: "git_remote_push"))
 				}
 				return .success(())
 			}
